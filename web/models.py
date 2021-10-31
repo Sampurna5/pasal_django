@@ -28,7 +28,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/products')
     price = models.IntegerField()
-    discounted_price = models.IntegerField()
+    discounted_price = models.IntegerField(blank=True, null=True)
     description = models.TextField()
     label = models.CharField(max_length=50, choices=LABEL, blank=True)
     stock = models.CharField(max_length=50, choices=STOCK)

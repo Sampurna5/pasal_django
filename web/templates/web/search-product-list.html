@@ -10,10 +10,10 @@
             <div class="row">
                 <div class="col-lg-12 text-center">
                     <div class="breadcrumb__text">
-                        <h2>{{ category }}</h2>
+                        <h2>Organi Shop</h2>
                         <div class="breadcrumb__option">
-                            <a href="/">Home</a>
-                            <span>{{ category }}</span>
+                            <a href="./index.html">Home</a>
+                            <span>Shop</span>
                         </div>
                     </div>
                 </div>
@@ -121,25 +121,19 @@
                         </div>
                         <div class="sidebar__item">
                             <div class="latest-product__text">
-                                <h4>New Arrivals</h4>
+                                <h4>Latest Products</h4>
                                 <div class="latest-product__slider owl-carousel">
                                     <div class="latest-prdouct__slider__item">
-                                        {% for product in new_products %}
                                         <a href="#" class="latest-product__item">
                                             <div class="latest-product__item__pic">
-                                                <img src="{{ product.image.url }}" alt="">
+                                                <img src="{% static 'web/img/latest-product/lp-1.jpg' %}" alt="">
                                             </div>
                                             <div class="latest-product__item__text">
-                                                <h6>{{ product.name }}</h6>
-                                                {% if product.discounted_price %}
-                                                <span>Rs. {{ product.discounted_price }}</span>
-                                                {% else %}
-                                                <span>Rs. {{ product.price }}</span>
-                                                {% endif %}
+                                                <h6>Crab Pool Security</h6>
+                                                <span>$30.00</span>
                                             </div>
                                         </a>
-                                        {% endfor %}
-                                        <!-- <a href="#" class="latest-product__item">
+                                        <a href="#" class="latest-product__item">
                                             <div class="latest-product__item__pic">
                                                 <img src="{% static 'web/img/latest-product/lp-2.jpg' %}" alt="">
                                             </div>
@@ -156,25 +150,19 @@
                                                 <h6>Crab Pool Security</h6>
                                                 <span>$30.00</span>
                                             </div>
-                                        </a> -->
+                                        </a>
                                     </div>
                                     <div class="latest-prdouct__slider__item">
-                                        {% for product in new_products %}
                                         <a href="#" class="latest-product__item">
                                             <div class="latest-product__item__pic">
-                                                <img src="{{ product.image.url }}" alt="">
+                                                <img src="{% static 'web/img/latest-product/lp-1.jpg' %}" alt="">
                                             </div>
                                             <div class="latest-product__item__text">
-                                                <h6>{{ product.name }}</h6>
-                                                {% if product.discounted_price %}
-                                                <span>Rs. {{ product.discounted_price }}</span>
-                                                {% else %}
-                                                <span>Rs. {{ product.price }}</span>
-                                                {% endif %}
+                                                <h6>Crab Pool Security</h6>
+                                                <span>$30.00</span>
                                             </div>
                                         </a>
-                                        {% endfor %}
-                                        <!-- <a href="#" class="latest-product__item">
+                                        <a href="#" class="latest-product__item">
                                             <div class="latest-product__item__pic">
                                                 <img src="{% static 'web/img/latest-product/lp-2.jpg' %}" alt="">
                                             </div>
@@ -191,7 +179,7 @@
                                                 <h6>Crab Pool Security</h6>
                                                 <span>$30.00</span>
                                             </div>
-                                        </a> -->
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -218,10 +206,10 @@
                                             </ul>
                                         </div>
                                         <div class="product__discount__item__text">
-                                            <span>{{ product.category.name|truncatechars_html:30 }}</span>
+                                            <span>{{ product.category.name }}</span>
                                             <h5><a href="{% url 'web:product-detail' product.slug %}">{{ product.name|truncatechars_html:25 }}</a></h5>
                                             {% if product.discounted_price %}
-                                            <div class="product__item__price">Rs. {{ product.discounted_price }}<span>Rs. {{ product.price }}</span></div>
+                                            <div class="product__item__price">Rs. {{ product.price }} <span>Rs. {{ product.discounted_price }}</span></div>
                                             {% else %}
                                             <div class="product__item__price">Rs. {{ product.price }}</div>
                                             {% endif %}
@@ -335,7 +323,7 @@
                             </div>
                             <div class="col-lg-4 col-md-4">
                                 <div class="filter__found">
-                                    <h6><span>{{ category_products.count }}</span> Products found</h6>
+                                    <h6><span>{{ searched_products.count }}</span> Products found</h6>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-3">
@@ -347,7 +335,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        {% for product in category_products %}
+                        {% for product in searched_products %}
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="{{ product.image.url }}">

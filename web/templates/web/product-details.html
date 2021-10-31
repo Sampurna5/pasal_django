@@ -57,7 +57,11 @@
                             <i class="fa fa-star-half-o"></i>
                             <span>(18 reviews)</span>
                         </div>
+                        {% if product.discounted_price %}
+                        <div class="product__details__price">Rs. {{ product.discounted_price }}&nbsp;&nbsp;<span style="text-decoration: line-through; color: lightgrey; font-size: x-large;">Rs. {{ product.price }}</span></div>
+                        {% else %}
                         <div class="product__details__price">Rs. {{ product.price }}</div>
+                        {% endif %}
                         <p>{{ product.description }}</p>
                         <div class="product__details__quantity">
                             <div class="quantity">
@@ -175,7 +179,11 @@
                         </div>
                         <div class="product__item__text">
                             <h6><a href="{% url 'web:product-detail' product.slug %}">{{ product.name|truncatechars_html:60 }}</a></h6>
+                            {% if product.discounted_price %}
+                            <h5>Rs. {{ product.discounted_price }}</h5>
+                            {% else %}
                             <h5>Rs. {{ product.price }}</h5>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

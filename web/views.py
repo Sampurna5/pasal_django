@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.generic import View
-from .models import Category, Product, Brand, BannerAd, SliderAd
+from .models import LABEL, Category, Product, Brand, BannerAd, SliderAd
 
 
 class HomePageView(View):
@@ -48,3 +48,20 @@ class ProductDetailView(View):
             'category_products': Product.objects.filter(category=category).order_by('?')[:4]
         }
         return render(request, 'web/product-details.html', context)
+
+
+class SearchView(View):
+    def get(self, request):
+        if request.method == 'GET':
+            search = request.GET['search']
+            context = {
+                'searched_products': Product.objects.filter(
+                    name__icontains=search
+                ),
+                'categories': Category.objects.all(),
+                'sale_products': Product.objects.filter(label='sale').order_by('?')[:3],
+            }
+        else:
+            return redirect('/')
+
+        return render(request, 'web/search-product-list.html', context)
