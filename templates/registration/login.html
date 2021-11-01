@@ -11,9 +11,9 @@
     {{ form.as_p }}
     <button class="site-btn" type="submit">Login</button>
     <hr>
-    <a href="/signup"><span>Create a new account?</span></a>
+    <a href="{% url 'signup' %}"><span>Create a new account?</span></a>
     <br>
-    <a href="#">Forgot Password?</a>
+    <a href="{% url 'reset-password' %}">Forgot Password?</a>
 </form>
 
 

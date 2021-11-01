@@ -64,14 +64,3 @@ class BannerAd(models.Model):
 
     def __str__(self):
         return self.name
-
-
-# class Customer(models.Model):
-#     first_name = models.CharField(max_length=150)
-#     last_name = models.CharField(max_length=150)
-#     phone = models.CharField(max_length=20)
-#     email = models.EmailField()
-#     password = models.CharField(max_length=200)
-    
-#     def __str__(self):
-#         return f"{self.first_name} {self.last_name}"
