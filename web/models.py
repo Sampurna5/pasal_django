@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.fields.files import ImageField
+from django.shortcuts import render
 
 
 LABEL = (('new', 'New'),('featured', 'Featured'), ('sale', 'On Sale'), ('', 'Default'))
@@ -8,7 +9,8 @@ STOCK = (('in', 'In Stock'), ('out', 'Out of Stock'))
 
 
 class User(AbstractUser):
-    pass
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=20, blank=True, unique=True)
 
 
 class Category(models.Model):
@@ -62,3 +64,14 @@ class BannerAd(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# class Customer(models.Model):
+#     first_name = models.CharField(max_length=150)
+#     last_name = models.CharField(max_length=150)
+#     phone = models.CharField(max_length=20)
+#     email = models.EmailField()
+#     password = models.CharField(max_length=200)
+    
+#     def __str__(self):
+#         return f"{self.first_name} {self.last_name}"

@@ -27,9 +27,9 @@
 
 <body>
     <!-- Page Preloder -->
-    <div id="preloder">
+    <!-- <div id="preloder">
         <div class="loader"></div>
-    </div>
+    </div> -->
 
     <!-- Header Section Begin -->
     <header class="header">
@@ -62,7 +62,13 @@
                                 </ul>
                             </div>
                             <div class="header__top__right__auth">
-                                <a href="#"><i class="fa fa-user"></i> Login</a>
+                                {% if not request.user.is_authenticated %}
+                                <a href="{% url 'web:login' %}"><i class="fa fa-user"></i> Login</a>
+                                {% endif %}
+                                {% if request.user.is_authenticated %}
+                                <i class="fa fa-user"></i> {{ request.user.username }}</p>
+                                <a href="{% url 'web:logout' %}">Logout</a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

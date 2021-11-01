@@ -1,0 +1,15 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<!-- {% for message in messages %}
+{{ message }}
+{% endfor %} -->
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="site-btn" type="submit">Signup</button>
+</form>
+
+{% endblock content %}
