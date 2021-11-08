@@ -24,6 +24,53 @@
     <link rel="stylesheet" href="{% static 'web/css/slicknav.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'web/css/style.css' %}" type="text/css">
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous"> -->
+    <style>
+        .pro-qty1 {
+            width: 140px;
+            height: 50px;
+            display: inline-block;
+            position: relative;
+            text-align: center;
+            background: #f5f5f5;
+            margin-bottom: 5px;
+        }
+
+        .pro-qty1 input {
+            height: 100%;
+            width: 100%;
+            font-size: 16px;
+            color: #6f6f6f;
+            width: 50px;
+            border: none;
+            background: #f5f5f5;
+            text-align: center;
+        }
+
+        .pro-qty1 .qtybtn {
+            width: 35px;
+            font-size: 16px;
+            color: #6f6f6f;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .shoping__cart__table table tbody tr td.shoping__cart__quantity .pro-qty1 {
+            width: 120px;
+            height: 40px;
+        }
+
+        .shoping__cart__table table tbody tr td.shoping__cart__quantity .pro-qty1 input {
+            color: #1c1c1c;
+        }
+
+        .shoping__cart__table table tbody tr td.shoping__cart__quantity .pro-qty1 input::placeholder {
+            color: #1c1c1c;
+        }
+
+        .shoping__cart__table table tbody tr td.shoping__cart__quantity .pro-qty1 .qtybtn {
+            width: 15px;
+        }
+    </style>
 </head>
 
 <body>
@@ -63,7 +110,13 @@
                                 </ul>
                             </div>
                             <div class="header__top__right__auth">
+                                {% if not request.user.is_authenticated %}
                                 <a href="{% url 'login' %}"><i class="fa fa-user"></i> Login</a>
+                                {% endif %}
+                                {% if request.user.is_authenticated %}
+                                <i class="fa fa-user"></i> {{ request.user.username }}</p>
+                                <a href="{% url 'logout' %}">Logout</a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -99,9 +152,9 @@
                     <div class="header__cart">
                         <ul>
                             <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
-                            <li><a href="#"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
+                            <li><a href="{% url 'web:cart' %}"><i class="fa fa-shopping-bag"></i> <span>{{ cart_count.total }}</span></a></li>
                         </ul>
-                        <div class="header__cart__price">item: <span>$150.00</span></div>
+                        <div class="header__cart__price">Total in cart: <span>Rs. {{ cart_total.total }}</span></div>
                     </div>
                 </div>
             </div>
@@ -133,7 +186,6 @@
                     <div class="hero__search">
                         <div class="hero__search__form">
                             <form action="{% url 'web:search' %}" method="GET">
-                                {% csrf_token %}
                                 <div class="hero__search__categories">
                                     All Categories
                                     <span class="arrow_carrot-down"></span>
@@ -240,7 +292,72 @@
     <script src="{% static 'web/js/owl.carousel.min.js' %}"></script>
     <script src="{% static 'web/js/main.js' %}"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
+    <script>
+        var cartTotal = $('.shoping__cart__total');
+        var proQty = $('.pro-qty1');
+        proQty.on('click', '.qtybtn', function () {
+            var $button = $(this);
+            var product_id = $button.parent().find('input[name="product_id"]').val();
+            var product_price = $button.parent().find('input[name="product_price"]').val();
+            //    console.log(product_price, 'productprice');
+            var cart_subtotal = $button.parent().find('input[name="cart_subtotal"]').val();
+            //    console.log(cart_subtotal, 'product sub');
+            var oldValue = $button.parent().find('input[name="product_quantity"]').val();
+            //    console.log(oldValue, "oldval")
 
+            if ($button.hasClass('inc')) {
+                var newVal = parseFloat(oldValue) + 1;
+                //    var newSubtotal = parseFloat(cart_subtotal) + parseFloat(product_price);
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    url: "/cart-update/",
+                    data: {
+                        'id' : product_id,
+                        'operation': 'increase'
+                    },
+                    success: function(data){
+                        $button.parent().find('input[name="product_quantity"]').val(newVal);
+                        
+                        $button.closest('.shoping__cart__quantity').siblings('.shoping__cart__total').text(`Rs. ${data.subtotal}`)
+                        console.log(data)
+                    },
+                    error: function(error){
+                        console.log(error)
+                    }
+                })
+            } else {
+                   // Don't allow decrementing below zero
+                if (oldValue > 0) {
+                    console.log(oldValue, 'oldValue');
+                    var newVal = parseFloat(oldValue) - 1;
+                       var newSubtotal = parseFloat(cart_subtotal) - parseFloat(product_price);
+                } else {
+                    newVal = 0;
+                    //    newSubtotal = 0;
+                }
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    url: "/cart-update/",
+                    data: {
+                        'id': product_id,
+                        'operation': 'decrease'
+                    },
+                    success: function(data){
+                        $button.parent().find('input[name="product_quantity"]').val(newVal);
+                            
+                        $button.closest('.shoping__cart__quantity').siblings('.shoping__cart__total').text(`Rs. ${data.subtotal}`)
+                        console.log(data)
+                    },
+                    error: function(error){
+                        console.log(error)
+                    }
+                 })
+            }
+        });
+    </script>
+       
 </body>
 
 </html>

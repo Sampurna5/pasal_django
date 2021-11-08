@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models.base import Model
 from django.db.models.fields.files import ImageField
 from django.shortcuts import render
 
@@ -64,3 +65,14 @@ class BannerAd(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Cart(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.CharField(max_length=100)
+    quantity = models.IntegerField(default=1)
+    subtotal = models.IntegerField(default=0)
+    total = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.product.name}"
