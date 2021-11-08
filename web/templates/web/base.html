@@ -151,7 +151,7 @@
                 <div class="col-lg-3">
                     <div class="header__cart">
                         <ul>
-                            <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
+                            <li><a href="{% url 'web:wishlist' %}"><i class="fa fa-heart"></i> <span>{{ wishlist_count }}</span></a></li>
                             <li><a href="{% url 'web:cart' %}"><i class="fa fa-shopping-bag"></i> <span>{{ cart_count.total }}</span></a></li>
                         </ul>
                         <div class="header__cart__price">Total in cart: <span>Rs. {{ cart_total.total }}</span></div>

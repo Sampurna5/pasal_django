@@ -1,0 +1,88 @@
+{% extends 'web/base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-section set-bg" data-setbg="{% static 'web/img/breadcrumb.jpg' %}">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb__text">
+                        <h2>Wishlist</h2>
+                        <div class="breadcrumb__option">
+                            <a href="/">Home</a>
+                            <span>Wishlist</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
+
+    <!-- Wishlist Section Begin -->
+    <section class="shoping-cart spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="shoping__cart__table">
+                        {% if wishlist_items.exists %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="shoping__product">Products</th>
+                                    <th>Price</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for wishlistitem in wishlist_items %}
+                                <tr>
+                                    <td class="shoping__cart__item">
+                                        <img src="{{ wishlistitem.product.image.url }}" alt="" style="height: 125px; width: 125px;">
+                                        <h5>{{ wishlistitem.product.name }}</h5>
+                                    </td>
+                                    {% if wishlistitem.product.discounted_price %}
+                                    <td class="shoping__cart__price">
+                                        Rs. {{ wishlistitem.product.discounted_price }}
+                                    </td>
+                                    {% else %}
+                                    <td class="shoping__cart__price">
+                                        Rs. {{ wishlistitem.product.price }}
+                                    </td>
+                                    {% endif %}
+                                    <td class="shoping__cart__item__close">
+                                        <a href="{% url 'web:add_to_cart' wishlistitem.product.id %}"><i class="fa fa-shopping-cart"></i> </a>
+                                        <a href="{% url 'web:delete_wishlist' wishlistitem.product.id %}"><span class="icon_close"></span></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <h4>You don't have any products in your wishlist.</h4>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="shoping__cart__btns">
+                        <a href="/" class="primary-btn cart-btn">CONTINUE SHOPPING</a>
+                        <!-- <a href="#" class="primary-btn cart-btn cart-btn-right"><span class="icon_loading"></span>
+                            Update Cart</a> -->
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="shoping__checkout">
+                        <a href="{% url 'web:cart' %}" class="primary-btn" >GO TO CART</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Wishlist Section End -->
+
+{% endblock content %}

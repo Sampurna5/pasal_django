@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Category, Product, Brand, SliderAd, BannerAd, Cart
+from .models import User, Category, Product, Brand, SliderAd, BannerAd, Cart, Wishlist
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -33,3 +33,4 @@ admin.site.register(SliderAd)
 admin.site.register(Brand)
 admin.site.register(BannerAd)
 admin.site.register(Cart)
+admin.site.register(Wishlist)

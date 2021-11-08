@@ -5,20 +5,30 @@ from django.shortcuts import redirect, render, reverse
 from django.contrib import messages, auth
 from django.views.generic import View
 from django.views import generic
-from .models import Category, Product, Brand, BannerAd, SliderAd, User, Cart
+from .models import Category, Product, Brand, BannerAd, SliderAd, User, Cart, Wishlist
 from .forms import CustomUserCreationForm
 from django.core.paginator import Paginator
 
 def cartOperations(request):
     cart_obj = Cart.objects.filter(user=request.user.username)
-    cart_total = cart_obj.values("subtotal").aggregate(total=Sum("subtotal"))
-    cart_count = cart_obj.values("quantity").aggregate(total=Sum("quantity"))
+    wishlist_obj = Wishlist.objects.filter(user=request.user.username)
+
+    if cart_obj.exists():
+        cart_total = cart_obj.values("subtotal").aggregate(total=Sum("subtotal"))
+        cart_count = cart_obj.values("quantity").aggregate(total=Sum("quantity"))
+    else:
+        cart_total = {'total': 0}
+        cart_count = {'total': 0}
+
+    wishlist_count = wishlist_obj.all().count()
     # select sum(subtotal) as total from Cart 
     
     return {
         'cart_total':cart_total, 
-        'cart_count':cart_count
+        'cart_count':cart_count,
+        'wishlist_count': wishlist_count,
         }
+
 
 class HomePageView(View):
     def get(self, request):
@@ -45,6 +55,7 @@ class HomePageView(View):
             'sale_products': Product.objects.filter(label='sale'),
             'cart_total': cartData['cart_total'],
             'cart_count': cartData['cart_count'],
+            'wishlist_count': cartData['wishlist_count'],
         }
         print(cartData)
         return render(request, 'web/index.html', context)
@@ -74,6 +85,7 @@ class CategoryProductsView(View):
             'sale_products': Product.objects.filter(label='sale', category=slug),
             'cart_total': cartData['cart_total'],
             'cart_count': cartData['cart_count'],
+            'wishlist_count': cartData['wishlist_count'],
         }
         print(context['sale_products'])
         return render(request, 'web/category-product-list.html', context)
@@ -91,6 +103,7 @@ class ProductDetailView(View):
             'category_products': Product.objects.filter(category=category).order_by('?')[:4],
             'cart_total': cartData['cart_total'],
             'cart_count': cartData['cart_count'],
+            'wishlist_count': cartData['wishlist_count'],
         }
         return render(request, 'web/product-details.html', context)
 
@@ -112,6 +125,7 @@ class SearchView(View):
             'sale_products': Product.objects.filter(label='sale').order_by('?')[:3],
             'cart_total': cartData['cart_total'],
             'cart_count': cartData['cart_count'],
+            'wishlist_count': cartData['wishlist_count'],
         }
 
         return render(request, 'web/search-product-list.html', context)
@@ -137,9 +151,11 @@ class CartView(View):
         cartData = cartOperations(request)
 
         context = {
+            'categories': Category.objects.all(),
             'cart_items': Cart.objects.filter(user=user),
             'cart_total': cartData['cart_total'],
             'cart_count': cartData['cart_count'],
+            'wishlist_count': cartData['wishlist_count'],
         }
     
         return render(request, 'web/shopping-cart.html', context)
@@ -164,7 +180,6 @@ def add_to_cart(request, id):
         Cart.objects.filter(product=id, user=user).update(
             quantity=quantity,
             subtotal=product_total,
-            # total=cart_total,
             )
 
     else:
@@ -197,7 +212,6 @@ def delete_cart(request, id):
 class CartUpdateView(View):
     def get(self, request):
         product_id = self.request.GET.get("id")
-        print('pid',product_id)
         operation = self.request.GET.get("operation")
         user = request.user.username
         product_obj = Product.objects.get(id=product_id)
@@ -228,6 +242,50 @@ class CartUpdateView(View):
         }
         print(cart_obj.quantity)
         return JsonResponse(data)
+
+
+class WishListView(View):
+    def get(self, request):
+        user = request.user.username
+
+        cartData = cartOperations(request)
+
+        context = {
+            'wishlist_items': Wishlist.objects.filter(user=user),
+            'cart_total': cartData['cart_total'],
+            'cart_count': cartData['cart_count'],
+            'wishlist_count': cartData['wishlist_count'],
+            'categories': Category.objects.all(),
+        }
+
+        return render(request, 'web/wishlist.html', context)
+
+
+def add_to_wishlist(request, id):
+    user = request.user.username
+
+    if Wishlist.objects.filter(product=id, user=user).exists():
+        pass
+    else:
+        # if Product.objects.get(id=id).discounted_price:
+        #     product_total = Product.objects.get(id=id).discounted_price
+        # else:
+        #     product_total = Product.objects.get(id=id).price
+
+        wishlist = Wishlist.objects.create(
+            product = Product.objects.get(id=id),
+            user = user,
+        )
+        wishlist.save()
+
+    return redirect('web:wishlist')
+
+
+def delete_wislist(request, id):
+    user = request.user.username
+    Wishlist.objects.filter(product=id, user=user).delete()
+
+    return redirect('web:wishlist')
 
 # def increase_in_cart(request, id):
 #     user = request.user.username
