@@ -6,7 +6,7 @@
 {% block content %}
     <!-- Breadcrumb Section Begin -->
     {% for product in selected_product %}
-    <section class="breadcrumb-section set-bg" data-setbg="{% static 'web/img/breadcrumb.jpg' %}">
+    <!-- <section class="breadcrumb-section set-bg" data-setbg="{% static 'web/img/breadcrumb.jpg' %}">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
@@ -21,12 +21,12 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- Breadcrumb Section End -->
 
     <!-- Product Details Section Begin -->
     <section class="product-details spad">
-        <div class="container">
+        <div class="container product_data">
             <div class="row">
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__pic">
@@ -48,6 +48,8 @@
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__text">
+                        {% csrf_token %}
+                        <input type="hidden" value="{{ product.id }}" class="product_id">
                         <h3>{{ product.name }}</h3>
                         <div class="product__details__rating">
                             <i class="fa fa-star"></i>
@@ -65,12 +67,16 @@
                         <p>{{ product.description }}</p>
                         <div class="product__details__quantity">
                             <div class="quantity">
-                                <div class="pro-qty">
-                                    <input type="text" value="1">
+                                <div class="pro-qty1">
+                                    <input type="hidden" name="product_id" value={{ product.product.id }}>
+                                    <input type="hidden" name="product_stock" value={{ product.stock_value }}>
+                                    <span class="dec d-qtybtn" >-</span>
+                                    <input type="text" value="1" name="product_quantity">
+                                    <span class="inc d-qtybtn">+</span>
                                 </div>
                             </div>
                         </div>
-                        <a href="{% url 'web:add_to_cart' product.id %}" class="primary-btn">ADD TO CART</a>
+                        <a type="button" class="primary-btn addToCartBtn">ADD TO CART</a>
                         <a href="{% url 'web:add_to_wishlist' product.id %}" class="heart-icon"><span class="icon_heart_alt"></span></a>
                         <ul>
                             <li><b>Availability</b> <span>{{ product.get_stock_display }}</span></li>
@@ -169,12 +175,15 @@
             <div class="row">
                 {% for product in category_products %}
                 <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="product__item">
+                    <div class="product__item product_data">
                         <div class="product__item__pic set-bg" data-setbg="{{ product.image.url }}">
                             <ul class="product__item__pic__hover">
+                                {% csrf_token %}
+                                <input type="hidden" value="{{ product.id }}" class="product_id">
                                 <li><a href="{% url 'web:add_to_wishlist' product.id %}"><i class="fa fa-heart"></i></a></li>
                                 <!-- <li><a href="#"><i class="fa fa-retweet"></i></a></li> -->
-                                <li><a href="{% url 'web:add_to_cart' product.id %}"><i class="fa fa-shopping-cart"></i></a></li>
+                                {# <li><a href="{% url 'web:add_to_cart' product.id %}"><i class="fa fa-shopping-cart"></i></a></li> #}
+                                <li><a type="button" class="addToCartBtn"><i class="fa fa-shopping-cart"></i></a></li>
                             </ul>
                         </div>
                         <div class="product__item__text">

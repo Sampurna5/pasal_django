@@ -54,6 +54,14 @@
             display: inline-block;
         }
 
+        .pro-qty1 .d-qtybtn {
+            width: 35px;
+            font-size: 16px;
+            color: #6f6f6f;
+            cursor: pointer;
+            display: inline-block;
+        }
+
         .shoping__cart__table table tbody tr td.shoping__cart__quantity .pro-qty1 {
             width: 120px;
             height: 40px;
@@ -69,6 +77,10 @@
 
         .shoping__cart__table table tbody tr td.shoping__cart__quantity .pro-qty1 .qtybtn {
             width: 15px;
+        }
+
+        .cart-btn-left-margin {
+            margin-left: 20px;
         }
     </style>
 </head>
@@ -328,10 +340,10 @@
                 })
             } else {
                    // Don't allow decrementing below zero
-                if (oldValue > 0) {
-                    console.log(oldValue, 'oldValue');
+                if (oldValue >= 0) {
+                    // console.log(oldValue, 'oldValue');
                     var newVal = parseFloat(oldValue) - 1;
-                       var newSubtotal = parseFloat(cart_subtotal) - parseFloat(product_price);
+                    //    var newSubtotal = parseFloat(cart_subtotal) - parseFloat(product_price);
                 } else {
                     newVal = 0;
                     //    newSubtotal = 0;
@@ -357,7 +369,111 @@
             }
         });
     </script>
-       
+
+    <!-- Add to cart script -->
+    <script>
+        $(".addToCartBtn").click(function (e) {
+            e.preventDefault();
+
+            var product_id = $(this).closest(".product_data").find(".product_id").val();
+            var token = $("input[name=csrfmiddlewaretoken]").val();
+
+            $.ajax({
+                method: "POST",
+                url: "/add-to-cart/",
+                data: {
+                    "product_id": product_id,
+                    csrfmiddlewaretoken: token,
+                },
+                success: function(response) {
+                    console.log(response)
+                }
+            });
+        });
+    </script>
+
+    <!-- Update Quantity in Product Details Page -->
+    <script>
+        var proQty = $(".pro-qty1")
+        proQty.on('click', '.d-qtybtn', function() {
+            var $button = $(this);
+            var qty = $button.parent().find('input[name="product_quantity"]').val()
+            var stock = $button.parent().find('input[name="product_stock"]').val()
+
+            if ($button.hasClass('inc')) {
+                var newQty = parseInt(qty) + 1;
+                if (newQty > stock) {
+                    newQty = qty
+                    alert("Quantity exceeds the stock value!" + "Qty: " + qty + "Stock: " + stock);
+                } else {
+                    newQty = parseInt(qty) + 1;
+                    // alert("Qty: " + newQty + "Stock: " + stock);
+                }
+            } else {
+                if (qty > 0) {
+                    var newQty = parseInt(qty) - 1;
+                } else {
+                    var newQty = 0;
+                }
+            }
+            $button.parent().find('input[name="product_quantity"]').val(newQty)
+        });
+    </script>
+    <!-- <script>
+        var proQty = $(".pro-qty1");
+        proQty.on('click', '.qtybtn', function() {
+            var $button = $(this);
+            var product_id = $button.parent().find('input[name="product_id"]').val();
+            var oldQty = $button.parent().find('input[name="product_quantity"]').val();
+
+        if ($button.hasClass('inc')) {
+            var newQty = parseFloat(oldQty) + 1;
+
+            $.ajax({
+                type: "GET",
+                // dataType: "json",
+                url: "/product-detail/",
+                data: {
+                    'id' : product_id,
+                    'operation': 'increase'
+                },
+                success: function(data){
+                    $button.parent().find('input[name="product_quantity"]').val(newQty);
+                        
+                    console.log(data)
+                },
+                error: function(error){
+                    console.log(error)
+                }
+            })
+        } else {
+               // Don't allow decrementing below zero
+            if (oldQty > 0) {
+                var newQty = parseFloat(oldQty) - 1;
+            } else {
+                newQty = 0;                 
+            }
+
+            $.ajax({
+                type: "GET",
+                // dataType: "json",
+                url: "/product-detail/",
+                data: {
+                    'id': product_id,
+                    'operation': 'decrease'
+                },
+                success: function(data){
+                    $button.parent().find('input[name="product_quantity"]').val(newQty);
+                            
+                    console.log(data)
+                },
+                error: function(error){
+                    console.log(error)
+                }
+            })
+        }
+        });
+    </script> -->
 </body>
 
 </html>

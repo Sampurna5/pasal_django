@@ -161,46 +161,138 @@ class CartView(View):
         return render(request, 'web/shopping-cart.html', context)
 
 
-def add_to_cart(request, id):
+def add_to_cart(request):
     user = request.user.username
-    if Cart.objects.filter(product=id, user=user).exists():
-        quantity = Cart.objects.get(product=id, user=user).quantity
-        quantity += 1
-        # cart_total = Cart.objects.get(product=id, user=user).total
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            product_id = int(request.POST.get('product_id'))
+            # product_stock = Product.objects.get(id=product_id, user=user).stock_value
+            product_obj = Product.objects.filter(id=product_id).first()
+            product_stock = product_obj.stock_value
 
-        if Product.objects.get(id=id).discounted_price:
-            product_unit_price = Product.objects.get(id=id).discounted_price
-            product_total = product_unit_price * quantity
+            if Cart.objects.filter(product=product_id, user=user).exists():
+                if product_stock > 0:
+                    quantity = Cart.objects.get(product=product_id, user=user).quantity
+                    quantity += 1
+                    product_stock -= 1
+
+                    # if Product.objects.get(id=product_id).discounted_price:
+                    if product_obj.discounted_price:
+                        # product_unit_price = Product.objects.get(id=product_id).discounted_price
+                        product_unit_price = product_obj.discounted_price
+                        product_total = product_unit_price * quantity
+                    else:
+                        # product_unit_price = Product.objects.get(id=product_id).price
+                        product_unit_price = product_obj.price
+                        product_total = product_unit_price * quantity
+
+                    Cart.objects.filter(product=product_id, user=user).update(
+                        quantity=quantity,
+                        subtotal=product_total,
+                    )
+                    
+                    if product_stock == 0:
+                        # product_obj.update(
+                        # stock_value=product_stock,
+                        # stock='out'
+                        # )
+                        product_obj.stock_value=product_stock
+                        product_obj.stock='out'
+                        product_obj.save()
+                    else:
+                        # product_obj.update(
+                        #     stock_value=product_stock,
+                        # )
+                        product_obj.stock_value=product_stock
+                        product_obj.save()
+
+                    # if product_stock == 0:
+                    #     product_obj.update(
+                    #         stock_value = product_stock,
+                    #         stock='out',
+                    #     )
+
+                    return JsonResponse({"status": "Product already in Cart."})
+                else:
+                    return JsonResponse({"status": "Product out of stock"})
+            else:
+                if product_stock > 0:
+                    product_stock -= 1
+                    if Product.objects.get(id=product_id).discounted_price:
+                        product_total = Product.objects.get(id=product_id).discounted_price
+                    else:
+                        product_total = Product.objects.get(id=product_id).price
+
+                    cart = Cart.objects.create(
+                        product = Product.objects.get(id=product_id),
+                        user = user,
+                        subtotal = product_total,
+                        # total = cart_total,
+                    )
+                    cart.save()
+
+                    if product_stock == 0:
+                        # product_obj.update(
+                        # stock_value=product_stock,
+                        # stock='out'
+                        # )
+                        product_obj.stock_value=product_stock
+                        product_obj.stock='out'
+                        product_obj.save()
+                    else:
+                        # product_obj.update(
+                        #     stock_value=product_stock,
+                        # )
+                        product_obj.stock_value=product_stock
+                        product_obj.save()
+                    return JsonResponse({'status': 'Product added to cart successfully.'})
+                else:
+                    return JsonResponse({'status': 'Product out of stock!'})
         else:
-            product_unit_price = Product.objects.get(id=id).price
-            product_total = product_unit_price * quantity
+            return JsonResponse({'status': 'Login to continue shopping.'})
+    return redirect('/')
 
-        # cart_total += product_total
 
-        Cart.objects.filter(product=id, user=user).update(
-            quantity=quantity,
-            subtotal=product_total,
-            )
+# def add_to_cart(request, id):
+#     user = request.user.username
+#     if Cart.objects.filter(product=id, user=user).exists():
+#         quantity = Cart.objects.get(product=id, user=user).quantity
+#         quantity += 1
+#         # cart_total = Cart.objects.get(product=id, user=user).total
 
-    else:
-        # cart_total = Cart.objects.all()[0].total
+        # if Product.objects.get(id=id).discounted_price:
+        #     product_unit_price = Product.objects.get(id=id).discounted_price
+        #     product_total = product_unit_price * quantity
+        # else:
+        #     product_unit_price = Product.objects.get(id=id).price
+        #     product_total = product_unit_price * quantity
 
-        if Product.objects.get(id=id).discounted_price:
-            product_total = Product.objects.get(id=id).discounted_price
-        else:
-            product_total = Product.objects.get(id=id).price
+#         # cart_total += product_total
 
-        # cart_total += product_total
+        # Cart.objects.filter(product=id, user=user).update(
+        #     quantity=quantity,
+        #     subtotal=product_total,
+        #     )
 
-        cart = Cart.objects.create(
-            product = Product.objects.get(id=id),
-            user = user,
-            subtotal = product_total,
-            # total = cart_total,
-        )
-        cart.save()
+#     else:
+#         # cart_total = Cart.objects.all()[0].total
 
-    return redirect('web:cart')
+        # if Product.objects.get(id=id).discounted_price:
+        #     product_total = Product.objects.get(id=id).discounted_price
+        # else:
+        #     product_total = Product.objects.get(id=id).price
+
+#         # cart_total += product_total
+
+        # cart = Cart.objects.create(
+        #     product = Product.objects.get(id=id),
+        #     user = user,
+        #     subtotal = product_total,
+        #     # total = cart_total,
+        # )
+        # cart.save()
+
+#     return redirect('web:cart')
 
 
 def delete_cart(request, id):
@@ -208,6 +300,7 @@ def delete_cart(request, id):
     Cart.objects.filter(product=id, user=user).delete()
 
     return redirect('web:cart')
+
 
 class CartUpdateView(View):
     def get(self, request):
@@ -240,7 +333,7 @@ class CartUpdateView(View):
             'subtotal': cart_obj.subtotal,
             'cart_count': cart_obj.quantity
         }
-        print(cart_obj.quantity)
+        # print(cart_obj.quantity)
         return JsonResponse(data)
 
 

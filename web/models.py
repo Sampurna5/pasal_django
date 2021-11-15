@@ -33,6 +33,7 @@ class Product(models.Model):
     price = models.IntegerField()
     discounted_price = models.IntegerField(blank=True, null=True)
     description = models.TextField()
+    stock_value = models.IntegerField()
     label = models.CharField(max_length=50, choices=LABEL, blank=True)
     stock = models.CharField(max_length=50, choices=STOCK)
 
