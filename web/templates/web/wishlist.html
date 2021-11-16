@@ -39,8 +39,10 @@
                             </thead>
                             <tbody>
                                 {% for wishlistitem in wishlist_items %}
-                                <tr>
+                                <tr class="product_data">
                                     <td class="shoping__cart__item">
+                                        {% csrf_token %}
+                                        <input type="hidden" value="{{ wishlistitem.product.id }}" class="product_id">
                                         <img src="{{ wishlistitem.product.image.url }}" alt="" style="height: 125px; width: 125px;">
                                         <h5>{{ wishlistitem.product.name }}</h5>
                                     </td>
@@ -54,7 +56,7 @@
                                     </td>
                                     {% endif %}
                                     <td class="shoping__cart__item__close">
-                                        <a href="{% url 'web:add_to_cart' wishlistitem.product.id %}"><i class="fa fa-shopping-cart"></i> </a>
+                                        <a type="button" class="addToCartBtn"><i class="fa fa-shopping-cart"></i></a>
                                         <a href="{% url 'web:delete_wishlist' wishlistitem.product.id %}"><span class="icon_close"></span></a>
                                     </td>
                                 </tr>

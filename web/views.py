@@ -166,6 +166,10 @@ def add_to_cart(request):
     if request.method == "POST":
         if request.user.is_authenticated:
             product_id = int(request.POST.get('product_id'))
+            product_quantity = 0
+            if request.POST.get('product_quantity'):
+            # if product_quantity:
+                product_quantity = int(request.POST.get('product_quantity'))
             # product_stock = Product.objects.get(id=product_id, user=user).stock_value
             product_obj = Product.objects.filter(id=product_id).first()
             product_stock = product_obj.stock_value
@@ -173,8 +177,12 @@ def add_to_cart(request):
             if Cart.objects.filter(product=product_id, user=user).exists():
                 if product_stock > 0:
                     quantity = Cart.objects.get(product=product_id, user=user).quantity
-                    quantity += 1
-                    product_stock -= 1
+                    if product_quantity > 1:
+                        quantity += product_quantity
+                        product_stock -= product_quantity
+                    else:
+                        quantity += 1
+                        product_stock -= 1
 
                     # if Product.objects.get(id=product_id).discounted_price:
                     if product_obj.discounted_price:
@@ -189,6 +197,10 @@ def add_to_cart(request):
                     Cart.objects.filter(product=product_id, user=user).update(
                         quantity=quantity,
                         subtotal=product_total,
+                    )
+
+                    Product.objects.filter(id=product_id).update(
+                        stock_value=product_stock
                     )
                     
                     if product_stock == 0:
@@ -217,15 +229,23 @@ def add_to_cart(request):
                     return JsonResponse({"status": "Product out of stock"})
             else:
                 if product_stock > 0:
-                    product_stock -= 1
-                    if Product.objects.get(id=product_id).discounted_price:
-                        product_total = Product.objects.get(id=product_id).discounted_price
+                    quantity = 0
+                    # quantity = Cart.objects.get(product=product_id, user=user).quantity
+                    if product_quantity > 1:
+                        quantity += product_quantity
+                        product_stock -= product_quantity
                     else:
-                        product_total = Product.objects.get(id=product_id).price
+                        quantity += 1
+                        product_stock -= 1
+                    if Product.objects.get(id=product_id).discounted_price:
+                        product_total = Product.objects.get(id=product_id).discounted_price * quantity
+                    else:
+                        product_total = Product.objects.get(id=product_id).price * quantity
 
                     cart = Cart.objects.create(
                         product = Product.objects.get(id=product_id),
                         user = user,
+                        quantity = quantity,
                         subtotal = product_total,
                         # total = cart_total,
                     )
@@ -297,7 +317,11 @@ def add_to_cart(request):
 
 def delete_cart(request, id):
     user = request.user.username
-    Cart.objects.filter(product=id, user=user).delete()
+    cart_obj = Cart.objects.get(product=id, user=user)
+    product_obj = Product.objects.get(id=id)
+    product_obj.stock_value += cart_obj.quantity
+    product_obj.save()
+    cart_obj.delete()
 
     return redirect('web:cart')
 
@@ -312,9 +336,11 @@ class CartUpdateView(View):
         if operation == "increase":
             cart_obj.quantity += 1
             cart_obj.subtotal += product_obj.price
+            product_obj.stock_value -= 1
         else:
             cart_obj.quantity -= 1
             cart_obj.subtotal -= product_obj.price
+            product_obj.stock_value += 1
 
         if product_obj.discounted_price:
             product_unit_price = product_obj.discounted_price
@@ -327,11 +353,21 @@ class CartUpdateView(View):
         #     quantity=cart_obj.quantity,
         #     subtotal=product_total,
         #     )
-        cart_obj.save()
+        if cart_obj.quantity == 0:
+            cart_obj.delete()
+        else:
+            cart_obj.save()
+        product_obj.save()
+
+        cart_total = 0
+        for cartitem in Cart.objects.filter(user=user):
+            cart_total += cartitem.subtotal
+
         data = {
             'product_id': product_id,
             'subtotal': cart_obj.subtotal,
-            'cart_count': cart_obj.quantity
+            'cart_count': cart_obj.quantity,
+            'cart_total': cart_total
         }
         # print(cart_obj.quantity)
         return JsonResponse(data)

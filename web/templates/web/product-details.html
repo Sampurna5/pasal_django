@@ -26,7 +26,7 @@
 
     <!-- Product Details Section Begin -->
     <section class="product-details spad">
-        <div class="container product_data">
+        <div class="container">
             <div class="row">
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__pic">
@@ -48,8 +48,6 @@
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__text">
-                        {% csrf_token %}
-                        <input type="hidden" value="{{ product.id }}" class="product_id">
                         <h3>{{ product.name }}</h3>
                         <div class="product__details__rating">
                             <i class="fa fa-star"></i>
@@ -68,15 +66,16 @@
                         <div class="product__details__quantity">
                             <div class="quantity">
                                 <div class="pro-qty1">
-                                    <input type="hidden" name="product_id" value={{ product.product.id }}>
-                                    <input type="hidden" name="product_stock" value={{ product.stock_value }}>
+                                    {% csrf_token %}
+                                    <input type="hidden" class="pro_id" value="{{ product.id }}">
+                                    <input type="hidden" name="product_stock" value="{{ product.stock_value }}">
                                     <span class="dec d-qtybtn" >-</span>
                                     <input type="text" value="1" name="product_quantity">
                                     <span class="inc d-qtybtn">+</span>
                                 </div>
                             </div>
                         </div>
-                        <a type="button" class="primary-btn addToCartBtn">ADD TO CART</a>
+                        <a type="button" id="addToCartBtn-details" class="primary-btn">ADD TO CART</a>
                         <a href="{% url 'web:add_to_wishlist' product.id %}" class="heart-icon"><span class="icon_heart_alt"></span></a>
                         <ul>
                             <li><b>Availability</b> <span>{{ product.get_stock_display }}</span></li>
